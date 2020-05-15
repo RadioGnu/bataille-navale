@@ -17,19 +17,30 @@ for i in COLUMN_IDENTIFIERS:
 
 ## Fonctions d'input
 def squareInput():
-    """Fonction qui demande une case à l'utilisateur."""
-    try:
-        square = input("Donner la case(ligne, colonne): ")
-    except len(square) != 2:
-        print("Erreur! Plus ou moins de deux caractères.")
-    return square
+    """Fonction qui demande une case à l'utilisateur, et convertit la chaine en tuple.\n
+    Dépend de EMPTY_MAP."""
+    while True:
+        try:
+            square = input("Donner la case(ligne, colonne): ")
+            row = square[0]        #row prend le premier caractère.
+            column = int(square[1:])  #column prend le reste des caractères, convertit en entier.
+            test_squ = EMPTY_MAP[row][int(column)-1]
+            return (row, column-1)
+        except ValueError:
+            print("Erreur! Plus ou moins de deux caractères, ou colonne qui n'est pas un nombre.\n")
+        except KeyError:
+            print("Erreur! La case {} n'est pas sur la grille.\n".format(square))
+        except IndexError:
+            print("Erreur! La case {} n'est pas sur la grille.\n".format(square))
+
+## Fonctions d'exécution
 
 def changeSquare(userSquare, map, addValue):
     """Permet de changer la valeur d'une case à partir
     de l'info donner par l'utilisateur.  
     On additionne addValue à la valeur de la case."""
-    row, column = userSquare    #row prend le premier caractère, column le deuxième.
-    map[row][int(column)] += addValue
+    row, column = userSquare
+    map[row][column] += addValue
 
 ## Fonctions d'affichage
 def displaySquare(square, beginning=False):
