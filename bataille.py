@@ -18,10 +18,18 @@ for i in COLUMN_IDENTIFIERS:
 ## Fonctions d'input
 def squareInput():
     """Fonction qui demande une case à l'utilisateur."""
-    square = input("Donner la case(ligne, colonne): ")
-    row = square[0]
-    column = int(square[1])
-    return row, column
+    try:
+        square = input("Donner la case(ligne, colonne): ")
+    except len(square) != 2:
+        print("Erreur! Plus ou moins de deux caractères.")
+    return square
+
+def changeSquare(userSquare, map, addValue):
+    """Permet de changer la valeur d'une case à partir
+    de l'info donner par l'utilisateur.  
+    On additionne addValue à la valeur de la case."""
+    row, column = userSquare    #row prend le premier caractère, column le deuxième.
+    map[row][int(column)] += addValue
 
 ## Fonctions d'affichage
 def displaySquare(square, beginning=False):
@@ -80,4 +88,7 @@ def displayMaps(map1, map2):
 mapP1 = EMPTY_MAP.copy()
 mapP2 = EMPTY_MAP.copy()
 
-displayMaps(mapP1, mapP2)
+test_squ = squareInput()
+changeSquare(test_squ, mapP1, 2)
+
+displayMapPrep(mapP1)
