@@ -39,14 +39,38 @@ def squareInput():
 
 ## Fonctions d'exécution
 
-def rowSubstraction(row1, row2):
-    return ord(row1) - ord(row2)
+def isBigger(coord1, coord2):
+    """Détermine si coord1 est plus grand que coord2."""
+    if type(coord1) is str and type(coord2) is str:
+        return ord(coord1) > ord(coord2)
+    elif type(coord1) is int and type(coord2) is int:
+        return coord1 > coord2
+    else:
+        raise TypeError
 
 def changeSquare(userSquare, map, value):
     """Permet de changer la valeur d'une case à partir
     de l'info donner par l'utilisateur."""
     row, column = userSquare
     map[row][column] = value
+
+def changeRow(coord1, coord2):
+    pass
+
+def placeBoat(coord1, coord2, boats):
+    """Place un bateau et vérifie si il peut exister."""
+    if type(coord1) is int:
+        diff = coord1 - coord2
+    if type(coord1) is str:
+        diff = ord(coord1) - ord(coord2)
+    try:
+        noBoats = boats.get(diff) == 0
+        if noBoats:
+            print("Il n'y a plus de bateaux de cette taille.\n")
+        else:
+            boats[diff] -= 1
+    except KeyError:
+        print("Le bateau n'est pas d'une taille existante.\n")
 
 ## Fonctions d'affichage
 def displaySquare(square, beginning=False):
@@ -109,17 +133,27 @@ def displayMaps(map1, map2):
 def prepPhase(map, boats):
     """Prépare la carte pour un des joueurs.
     C'est la phase de placement des bateaux."""
-    number_boats = sum(boats.values())
-    while number_boats != 0:
+    while True:
+        number_boats = sum(boats.values())
+        if number_boats == 0:
+            break
         print("Donner les cases de début et de fin de votre bateau.")
         print("Il vous reste : ")
         for taille, nombre in boats.items():
-            print("{} bateau de taille {}".format(nombre, taille))
-        square1 = squareInput()
-        square2 = squareInput()
-        row1, column1 = square1
-        row2, column2 = square2
-        print(row1, column1, row2, column2)
+            print("{} bateau(x) de taille {}".format(nombre, taille))
+        row1, column1 = squareInput()
+        row2, column2 = squareInput()
+        if row1 == row2:
+            if isBigger(column1, column2):
+                placeBoat(column1, column2, boats)
+            else:
+                placeBoat(column2,column1, boats)
+        if column1 == column2:
+            print("OK")
+        if row1 != row2 and column1 != column2:
+            print("Erreur! Les cases {}{} et {}{} ne sont pas alignées.\n".format(
+                row1,column1+1,row2,column2+1))
+        #displayMapPrep(map)
     #displayMapPrep(map)
     #return map
 
@@ -127,4 +161,4 @@ def prepPhase(map, boats):
 mapP1 = deepcopy(EMPTY_MAP)
 mapP2 = deepcopy(EMPTY_MAP)
 
-displayMapPrep(mapP1)
+prepPhase(mapP1, BOATS)
