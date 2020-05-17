@@ -17,6 +17,12 @@ for i in COLUMN_IDENTIFIERS:
     EMPTY_MAP[i] = EMPTY_ROW.copy()
 BOATS = {2:1, 3:2, 4:1, 5:1}    #Les bateaux organisés sous la forme taille:nombre
 
+# Erreurs
+class OverlapError(Exception):
+    """Erreur quand on essaye de placer une case bateau sur une case
+    qui a déjà un bateau."""
+    pass
+
 # Fonctions
 
 ## Fonctions d'input
@@ -54,23 +60,42 @@ def changeSquare(userSquare, map, value):
     row, column = userSquare
     map[row][column] = value
 
-def changeRow(coord1, coord2):
-    pass
+def changeSquares(map, lign, begin, end):
+    """Change plusieurs cases, sur la carte map, 
+    sur la ligne lign, de begin à end."""
+    if type(lign) is str:
+        for otherLign in range(begin, end+1):
+            if map[lign][otherLign] == 2:
+                raise OverlapError
+        for otherLign in range(begin, end+1):
+            changeSquare((lign, otherLign), map, 2)
+    if type(lign) is int:
+        begin = COLUMN_IDENTIFIERS.index(begin)
+        end = COLUMN_IDENTIFIERS.index(end)
+        for otherLign in COLUMN_IDENTIFIERS[begin:end+1]:
+            if map[otherLign][lign] == 2:
+                raise OverlapError
+        for otherLign in COLUMN_IDENTIFIERS[begin:end+1]:
+            changeSquare((otherLign, lign), map, 2)
 
-def placeBoat(coord1, coord2, boats):
-    """Place un bateau et vérifie si il peut exister."""
-    if type(coord1) is int:
-        diff = coord1 - coord2
-    if type(coord1) is str:
-        diff = ord(coord1) - ord(coord2)
+def placeBoat(map, lign, end, begin, boats):
+    """Place un bateau en vérifiant si il n'y a pas déjà
+    de bateau là où il est placé."""
+    if type(begin) is int:
+        diff = end - begin +1
+    if type(begin) is str:
+        diff = ord(end) - ord(begin) +1
     try:
         noBoats = boats.get(diff) == 0
         if noBoats:
             print("Il n'y a plus de bateaux de cette taille.\n")
         else:
             boats[diff] -= 1
+            changeSquares(map, lign, begin, end)
     except KeyError:
         print("Le bateau n'est pas d'une taille existante.\n")
+    except OverlapError:
+        print("Il y a un déjà un bateau sur une des cases!\n")
 
 ## Fonctions d'affichage
 def displaySquare(square, beginning=False):
@@ -83,7 +108,7 @@ def displaySquare(square, beginning=False):
     Le paramètre beginning permet d'afficher ou non les cases bateaux."""
     if beginning:
         if square == 2:
-            return '='
+            return 'B'
     if square == 0 or square == 2:
         return '~'
     if square == 1:
@@ -145,15 +170,18 @@ def prepPhase(map, boats):
         row2, column2 = squareInput()
         if row1 == row2:
             if isBigger(column1, column2):
-                placeBoat(column1, column2, boats)
+                placeBoat(map, row1, column1, column2, boats)
             else:
-                placeBoat(column2,column1, boats)
+                placeBoat(map, row1, column2, column1, boats)
         if column1 == column2:
-            print("OK")
+            if isBigger(row1, row2):
+                placeBoat(map, column1, row1, row2, boats)
+            else:
+                placeBoat(map, column1, row2, row1, boats)
         if row1 != row2 and column1 != column2:
             print("Erreur! Les cases {}{} et {}{} ne sont pas alignées.\n".format(
                 row1,column1+1,row2,column2+1))
-        #displayMapPrep(map)
+        displayMapPrep(map)
     #displayMapPrep(map)
     #return map
 
