@@ -136,7 +136,7 @@ def displayMapPrep(map):
 
 def displayMaps(map1, map2):
     """Affiche les deux cartes simultanément, sans donner d'information à l'adversaire."""
-    print("#############################")
+    print("\n#############################")
     for _ in range(2):
         print("\t", end="")
         for column_name in range(10):
@@ -158,6 +158,7 @@ def displayMaps(map1, map2):
 def prepPhase(map, boats):
     """Prépare la carte pour un des joueurs.
     C'est la phase de placement des bateaux."""
+    displayMapPrep(EMPTY_MAP)
     while True:
         number_boats = sum(boats.values())
         if number_boats == 0:
@@ -182,8 +183,6 @@ def prepPhase(map, boats):
             print("Erreur! Les cases {}{} et {}{} ne sont pas alignées.\n".format(
                 row1,column1+1,row2,column2+1))
         displayMapPrep(map)
-    #displayMapPrep(map)
-    #return map
 
 # Main 
 mapP1 = deepcopy(EMPTY_MAP)
