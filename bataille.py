@@ -23,6 +23,11 @@ class OverlapError(Exception):
     qui a déjà un bateau."""
     pass
 
+class NoMoreBoatsError(Exception):
+    """Erreur quand on essaye de placer un bateau d'une taille qui
+    n'est plus disponible."""
+    pass
+
 # Fonctions
 
 ## Fonctions d'input
@@ -87,17 +92,12 @@ def placeBoat(map, lign, begin, end, boats):
         diff = end - begin +1
     if type(begin) is str:
         diff = ord(end) - ord(begin) +1
-    try:
-        noBoats = boats.get(diff) == 0
-        if noBoats:
-            print("Il n'y a plus de bateaux de cette taille.\n")
-        else:
-            boats[diff] -= 1
-            changeSquares(map, lign, begin, end, 2)
-    except KeyError:
-        print("Erreur! Le bateau n'est pas d'une taille existante.\n")
-    except OverlapError:
-        print("Erreur! Il y a un déjà un bateau sur une des cases.\n")
+    noBoats = boats.get(diff) == 0
+    if noBoats:
+        raise NoMoreBoatsError
+    else:
+        boats[diff] -= 1
+        changeSquares(map, lign, begin, end, 2)
 
 def resetBoat(map, lign, begin, end, boats):
     """Enlève un bateau de la carte."""
@@ -111,11 +111,18 @@ def resetBoat(map, lign, begin, end, boats):
 def placeOrReset(map, lign, begin, end, boats):
     """Place le bateau demandé par l'utilisateur et lui demande si
     il veut l'enlever."""
-    placeBoat(map, lign, begin, end, boats)
-    displayMapPrep(map)
-    reset = input("Voulez vous enlever le dernier bateau placé?(o/n) ")
-    if reset == 'o':
-        resetBoat(map, lign, begin, end, boats)
+    try:
+        placeBoat(map, lign, begin, end, boats)
+        displayMapPrep(map)
+        reset = input("Voulez vous enlever le dernier bateau placé?(o/n) ")
+        if reset == 'o':
+            resetBoat(map, lign, begin, end, boats)
+    except KeyError:
+        print("Erreur! Le bateau n'est pas d'une taille existante.\n")
+    except OverlapError:
+        print("Erreur! Il y a un déjà un bateau sur une des cases.\n")
+    except NoMoreBoatsError:
+        print("Erreur! Il n'y a plus de bateaux de cette taille.\n")
 
 ## Fonctions d'affichage
 def displaySquare(square, beginning=False):
