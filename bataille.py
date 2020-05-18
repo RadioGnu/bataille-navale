@@ -141,15 +141,16 @@ def displayMaps(map1, map2):
         print("\t", end="")
         for column_name in range(10):
             print(column_name+1,end=" ")
+        print("\t", end="")    
     print("")
     
-    for row_name1, row1 in map1.items():
+    for (row_name1, row1), (row_name2, row2) in zip(map1.items(), map2.items()):
         print(row_name1,end="\t")
         for square1 in row1:
             print(displaySquare(square1),end=" ")
-        """print(row_name2, end="\t")
+        print("\t", row_name2, end="\t")
         for square2 in row2:
-            print(displaySquare(square2),end=" ")"""
+            print(displaySquare(square2),end=" ")
         print("")
     print("#############################\n")
 
@@ -189,3 +190,4 @@ mapP1 = deepcopy(EMPTY_MAP)
 mapP2 = deepcopy(EMPTY_MAP)
 
 prepPhase(mapP1, BOATS)
+displayMaps(mapP1, mapP2)
