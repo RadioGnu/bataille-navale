@@ -60,25 +60,27 @@ def changeSquare(userSquare, map, value):
     row, column = userSquare
     map[row][column] = value
 
-def changeSquares(map, lign, begin, end):
+def changeSquares(map, lign, begin, end, value):
     """Change plusieurs cases, sur la carte map, 
     sur la ligne lign, de begin à end."""
     if type(lign) is str:
+        if value == 2:
+            for otherLign in range(begin, end+1):
+                if map[lign][otherLign] == 2:
+                    raise OverlapError
         for otherLign in range(begin, end+1):
-            if map[lign][otherLign] == 2:
-                raise OverlapError
-        for otherLign in range(begin, end+1):
-            changeSquare((lign, otherLign), map, 2)
+            changeSquare((lign, otherLign), map, value)
     if type(lign) is int:
         begin = COLUMN_IDENTIFIERS.index(begin)
         end = COLUMN_IDENTIFIERS.index(end)
+        if value == 2:
+            for otherLign in COLUMN_IDENTIFIERS[begin:end+1]:
+                if map[otherLign][lign] == 2:
+                    raise OverlapError
         for otherLign in COLUMN_IDENTIFIERS[begin:end+1]:
-            if map[otherLign][lign] == 2:
-                raise OverlapError
-        for otherLign in COLUMN_IDENTIFIERS[begin:end+1]:
-            changeSquare((otherLign, lign), map, 2)
+            changeSquare((otherLign, lign), map, value)
 
-def placeBoat(map, lign, end, begin, boats):
+def placeBoat(map, lign, begin, end, boats):
     """Place un bateau en vérifiant si il n'y a pas déjà
     de bateau là où il est placé."""
     if type(begin) is int:
@@ -91,11 +93,29 @@ def placeBoat(map, lign, end, begin, boats):
             print("Il n'y a plus de bateaux de cette taille.\n")
         else:
             boats[diff] -= 1
-            changeSquares(map, lign, begin, end)
+            changeSquares(map, lign, begin, end, 2)
     except KeyError:
         print("Erreur! Le bateau n'est pas d'une taille existante.\n")
     except OverlapError:
         print("Erreur! Il y a un déjà un bateau sur une des cases.\n")
+
+def resetBoat(map, lign, begin, end, boats):
+    """Enlève un bateau de la carte."""
+    if type(begin) is int:
+        diff = end - begin +1
+    if type(begin) is str:
+        diff = ord(end) - ord(begin) +1
+    boats[diff] += 1    #On remet le bateau dans le compteur
+    changeSquares(map, lign, begin, end, 0)
+
+def placeOrReset(map, lign, begin, end, boats):
+    """Place le bateau demandé par l'utilisateur et lui demande si
+    il veut l'enlever."""
+    placeBoat(map, lign, begin, end, boats)
+    displayMapPrep(map)
+    reset = input("Voulez vous enlever le dernier bateau placé?(o/n) ")
+    if reset == 'o':
+        resetBoat(map, lign, begin, end, boats)
 
 ## Fonctions d'affichage
 def displaySquare(square, beginning=False):
@@ -173,18 +193,18 @@ def prepPhase(map, boats):
         row2, column2 = squareInput()
         if row1 == row2:
             if isBigger(column1, column2):
-                placeBoat(map, row1, column1, column2, boats)
+                placeOrReset(map, row1, column2, column1, boats)                  
             else:
-                placeBoat(map, row1, column2, column1, boats)
+                placeOrReset(map, row1, column1, column2, boats)
         if column1 == column2:
             if isBigger(row1, row2):
-                placeBoat(map, column1, row1, row2, boats)
+                placeOrReset(map, column1, row2, row1, boats)
             else:
-                placeBoat(map, column1, row2, row1, boats)
+                placeOrReset(map, column1, row1, row2, boats)
         if row1 != row2 and column1 != column2:
             print("Erreur! Les cases {}{} et {}{} ne sont pas alignées.\n".format(
                 row1,column1+1,row2,column2+1))
-        displayMapPrep(map)
+    displayMapPrep(map)
 
 # Main 
 mapP1 = deepcopy(EMPTY_MAP)
