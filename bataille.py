@@ -29,6 +29,10 @@ class NoMoreBoatsError(Exception):
     n'est plus disponible."""
     pass
 
+class AttackedError(Exception):
+    """Erreur quand on attaque une case déjà attaquée."""
+    pass
+
 # Fonctions
 
 ## Fonctions d'input
@@ -119,7 +123,7 @@ def placeOrReset(map, lign, begin, end, boats):
     except NoMoreBoatsError:
         print("Erreur! Il n'y a plus de bateaux de cette taille.\n")
 
-def attackSquare(map, row, column):
+def attackSquare(map, row, column, boats):
     """Attaque d'une case par un joueur. Cela modifie l'état de cette case."""
     value = map[row][column]
     if value == 0:
@@ -129,7 +133,7 @@ def attackSquare(map, row, column):
         print("Touché! C'est réussi.\n")
         map[row][column] = 3
     else:
-        print("WTFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
+        raise AttackedError
 
 ## Fonctions d'affichage
 
@@ -234,14 +238,22 @@ def battlePhase(map1, map2, boats):
         elif noBoatsP2:
             print("Le joueur 1 a gagné !")
             break
-        for number in range(1,3):
-            print("Joueur " + str(number) + ", attaquez une case.")
-            row, column = squareInput()
-            if number == 1:
-                print(row, column)
-                attackSquare(map2, row, column)
-            else:
-                attackSquare(map1, row, column)
+        for turn in range(1,3):
+            print("Joueur " + str(turn) + ", attaquez une case.")
+            while turn == 1:
+                try:
+                    row, column = squareInput()
+                    attackSquare(map2, row, column, boatsP2)
+                    turn = 0    #Le tour est passé
+                except AttackedError:
+                    print("Vous avez déjà attaqué cette case.")
+            while turn == 2:
+                try:
+                    row, column = squareInput()
+                    attackSquare(map1, row, column, boatsP2)
+                    turn = 0
+                except AttackedError:
+                    print("Vous avez déjà attaqué cette case.")
             displayMaps(map1,map2)
 
 # Main 
@@ -255,4 +267,4 @@ prepPhase(mapP2, BOATS.copy())"""
 changeSquares(mapP1, 'B', 1, 5, 2)
 changeSquares(mapP2, 'B', 1, 5, 2)
 
-battlePhase(mapP1, mapP2, BOATS_TEST)
+battlePhase(mapP1, mapP2, BOATS)
