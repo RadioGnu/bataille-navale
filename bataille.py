@@ -16,6 +16,7 @@ EMPTY_MAP = {}
 for i in COLUMN_IDENTIFIERS:
     EMPTY_MAP[i] = EMPTY_ROW.copy()
 BOATS = {2:1, 3:2, 4:1, 5:1}    #Les bateaux organisés sous la forme taille:nombre
+BOATS_TEST = {2:0}
 
 # Erreurs
 class OverlapError(Exception):
@@ -59,12 +60,6 @@ def isBigger(coord1, coord2):
     else:
         raise TypeError
 
-def changeSquare(userSquare, map, value):
-    """Permet de changer la valeur d'une case à partir
-    de l'info donner par l'utilisateur."""
-    row, column = userSquare
-    map[row][column] = value
-
 def changeSquares(map, lign, begin, end, value):
     """Change plusieurs cases, sur la carte map, 
     sur la ligne lign, de begin à end."""
@@ -74,7 +69,7 @@ def changeSquares(map, lign, begin, end, value):
                 if map[lign][otherLign] == 2:
                     raise OverlapError
         for otherLign in range(begin, end+1):
-            changeSquare((lign, otherLign), map, value)
+            map[lign][otherLign] = value
     if type(lign) is int:
         begin = COLUMN_IDENTIFIERS.index(begin)
         end = COLUMN_IDENTIFIERS.index(end)
@@ -83,7 +78,7 @@ def changeSquares(map, lign, begin, end, value):
                 if map[otherLign][lign] == 2:
                     raise OverlapError
         for otherLign in COLUMN_IDENTIFIERS[begin:end+1]:
-            changeSquare((otherLign, lign), map, value)
+            map[otherLign][lign] = value
 
 def placeBoat(map, lign, begin, end, boats):
     """Place un bateau en vérifiant si il n'y a pas déjà
@@ -124,7 +119,20 @@ def placeOrReset(map, lign, begin, end, boats):
     except NoMoreBoatsError:
         print("Erreur! Il n'y a plus de bateaux de cette taille.\n")
 
+def attackSquare(map, row, column):
+    """Attaque d'une case par un joueur. Cela modifie l'état de cette case."""
+    value = map[row][column]
+    if value == 0:
+        print("Plouf! C'est raté.\n")
+        map[row][column] = 1
+    elif value == 2:
+        print("Touché! C'est réussi.\n")
+        map[row][column] = 3
+    else:
+        print("WTFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
+
 ## Fonctions d'affichage
+
 def displaySquare(square, beginning=False):
     """Renvoie l'affichage de la case par rapport à sa valeur.\n
     -0: Case vide non révélée.
@@ -138,12 +146,12 @@ def displaySquare(square, beginning=False):
             return 'B'
     if square == 0 or square == 2:
         return '~'
-    if square == 1:
-        return 'o'
-    if square == 3:
+    elif square == 1:
         return 'x'
-    if square == 4:
-        return 'X'
+    elif square == 3:
+        return 'o'
+    elif square == 4:
+        return 'c'
 
 def displayMapPrep(map):
     """Affiche la carte d'un des joueurs, avec les emplacements des bateaux.
@@ -203,23 +211,48 @@ def prepPhase(map, boats):
                 placeOrReset(map, row1, column2, column1, boats)                  
             else:
                 placeOrReset(map, row1, column1, column2, boats)
-        if column1 == column2:
+        elif column1 == column2:
             if isBigger(row1, row2):
                 placeOrReset(map, column1, row2, row1, boats)
             else:
                 placeOrReset(map, column1, row1, row2, boats)
-        if row1 != row2 and column1 != column2:
+        elif row1 != row2 and column1 != column2:
             print("Erreur! Les cases {}{} et {}{} ne sont pas alignées.\n".format(
                 row1,column1+1,row2,column2+1))
     displayMapPrep(map)
+
+def battlePhase(map1, map2, boats):
+    """Les joueurs choississent à tour de rôle les cases qu'ils veulent attaquer."""
+    boatsP1, boatsP2 = boats.copy(), boats.copy()
+    displayMaps(mapP1, mapP2)
+    while True:
+        noBoatsP1 = sum(boatsP1.values()) == 0
+        noBoatsP2 = sum(boatsP2.values()) == 0
+        if noBoatsP1:
+            print("Le joueur 2 a gagné !")
+            break
+        elif noBoatsP2:
+            print("Le joueur 1 a gagné !")
+            break
+        for number in range(1,3):
+            print("Joueur " + str(number) + ", attaquez une case.")
+            row, column = squareInput()
+            if number == 1:
+                print(row, column)
+                attackSquare(map2, row, column)
+            else:
+                attackSquare(map1, row, column)
+            displayMaps(map1,map2)
 
 # Main 
 mapP1 = deepcopy(EMPTY_MAP)
 mapP2 = deepcopy(EMPTY_MAP)
 
-print("C'est au tour du joueur 1 de placer ses bateaux.\n")
+"""print("C'est au tour du joueur 1 de placer ses bateaux.\n")
 prepPhase(mapP1, BOATS.copy())
 print("C'est au tour du joueur 2 de placer ses bateaux.\n")
-prepPhase(mapP2, BOATS.copy())
+prepPhase(mapP2, BOATS.copy())"""
+changeSquares(mapP1, 'B', 1, 5, 2)
+changeSquares(mapP2, 'B', 1, 5, 2)
 
-displayMaps(mapP1, mapP2)
+battlePhase(mapP1, mapP2, BOATS_TEST)
