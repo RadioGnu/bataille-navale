@@ -93,9 +93,9 @@ def placeBoat(map, lign, end, begin, boats):
             boats[diff] -= 1
             changeSquares(map, lign, begin, end)
     except KeyError:
-        print("Le bateau n'est pas d'une taille existante.\n")
+        print("Erreur! Le bateau n'est pas d'une taille existante.\n")
     except OverlapError:
-        print("Il y a un déjà un bateau sur une des cases!\n")
+        print("Erreur! Il y a un déjà un bateau sur une des cases.\n")
 
 ## Fonctions d'affichage
 def displaySquare(square, beginning=False):
@@ -136,7 +136,8 @@ def displayMapPrep(map):
 
 def displayMaps(map1, map2):
     """Affiche les deux cartes simultanément, sans donner d'information à l'adversaire."""
-    print("\n#############################")
+    print("\n########### Joueur 1 ##########\t",
+            "########### Joueur 2 ##########")
     for _ in range(2):
         print("\t", end="")
         for column_name in range(10):
@@ -152,7 +153,7 @@ def displayMaps(map1, map2):
         for square2 in row2:
             print(displaySquare(square2),end=" ")
         print("")
-    print("#############################\n")
+    print("\n")
 
 ## Fonctions principales
 
