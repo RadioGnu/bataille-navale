@@ -217,5 +217,9 @@ def prepPhase(map, boats):
 mapP1 = deepcopy(EMPTY_MAP)
 mapP2 = deepcopy(EMPTY_MAP)
 
-prepPhase(mapP1, BOATS)
+print("C'est au tour du joueur 1 de placer ses bateaux.\n")
+prepPhase(mapP1, BOATS.copy())
+print("C'est au tour du joueur 2 de placer ses bateaux.\n")
+prepPhase(mapP2, BOATS.copy())
+
 displayMaps(mapP1, mapP2)
