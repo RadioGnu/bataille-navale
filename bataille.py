@@ -15,8 +15,7 @@ COLUMN_IDENTIFIERS = ['A','B','C','D','E','F','G','H','I','J'] #Identifiants des
 EMPTY_MAP = {}
 for i in COLUMN_IDENTIFIERS:
     EMPTY_MAP[i] = EMPTY_ROW.copy()
-BOATS = {2:1, 3:2, 4:1, 5:1}    #Les bateaux organisés sous la forme taille:nombre
-BOATS_TEST = {2:0}
+BOATS = {2:[1], 3:[2], 4:[1], 5:[1]}    #Les bateaux organisés sous la forme taille:nombre
 
 # Erreurs
 class OverlapError(Exception):
@@ -64,11 +63,21 @@ def isBigger(coord1, coord2):
     else:
         raise TypeError
 
+def difference(coord1, coord2):
+    """Fait la différence entre deux coordonnées.
+    Coord 1 < coord2.  
+    Ex: 3-1 = 2 et C - A = 2"""
+    if type(coord1) is int:
+        diff = coord2 - coord1 +1
+    if type(coord1) is str:
+        diff = ord(coord2) - ord(coord1) +1
+    return diff
+
 def changeSquares(map, lign, begin, end, value):
     """Change plusieurs cases, sur la carte map, 
     sur la ligne lign, de begin à end."""
     if type(lign) is str:
-        if value == 2:
+        if value == 2:      #On essaye de placer un bateau, donc on vérifie si il y en a déjà un.
             for otherLign in range(begin, end+1):
                 if map[lign][otherLign] == 2:
                     raise OverlapError
@@ -84,44 +93,42 @@ def changeSquares(map, lign, begin, end, value):
         for otherLign in COLUMN_IDENTIFIERS[begin:end+1]:
             map[otherLign][lign] = value
 
-def placeBoat(map, lign, begin, end, boats):
+def placeBoat(map, lign, begin, end, diff, boats):
     """Place un bateau en vérifiant si il n'y a pas déjà
     de bateau là où il est placé."""
-    if type(begin) is int:
-        diff = end - begin +1
-    if type(begin) is str:
-        diff = ord(end) - ord(begin) +1
-    noBoats = boats.get(diff) == 0
+    noBoats = boats[diff][0] == 0
     if noBoats:
         raise NoMoreBoatsError
     else:
-        boats[diff] -= 1
+        boats[diff][0] -= 1
         changeSquares(map, lign, begin, end, 2)
 
-def resetBoat(map, lign, begin, end, boats):
+def resetBoat(map, lign, begin, end, diff, boats):
     """Enlève un bateau de la carte."""
-    if type(begin) is int:
-        diff = end - begin +1
-    if type(begin) is str:
-        diff = ord(end) - ord(begin) +1
-    boats[diff] += 1    #On remet le bateau dans le compteur
+    boats[diff][0] += 1    #On remet le bateau dans le compteur
     changeSquares(map, lign, begin, end, 0)
 
 def placeOrReset(map, lign, begin, end, boats):
     """Place le bateau demandé par l'utilisateur et lui demande si
     il veut l'enlever."""
     try:
-        placeBoat(map, lign, begin, end, boats)
+        diff = difference(begin, end)
+        placeBoat(map, lign, begin, end, diff, boats)
         displayMapPrep(map)
         reset = input("Voulez vous enlever le dernier bateau placé?(o/n) ")
         if reset == 'o':
-            resetBoat(map, lign, begin, end, boats)
+            resetBoat(map, lign, begin, end, diff, boats)
+        boats[diff].append((lign, begin, end))
     except KeyError:
         print("Erreur! Le bateau n'est pas d'une taille existante.\n")
     except OverlapError:
         print("Erreur! Il y a un déjà un bateau sur une des cases.\n")
     except NoMoreBoatsError:
         print("Erreur! Il n'y a plus de bateaux de cette taille.\n")
+
+def isSinked(map, row, column):
+    """Regarde si un bateau doit couler."""
+    pass
 
 def attackSquare(map, row, column, boats):
     """Attaque d'une case par un joueur. Cela modifie l'état de cette case."""
@@ -132,6 +139,7 @@ def attackSquare(map, row, column, boats):
     elif value == 2:
         print("Touché! C'est réussi.\n")
         map[row][column] = 3
+        isSinked(map, row, column)
     else:
         raise AttackedError
 
@@ -201,13 +209,15 @@ def prepPhase(map, boats):
     C'est la phase de placement des bateaux."""
     displayMapPrep(EMPTY_MAP)
     while True:
-        number_boats = sum(boats.values())
+        number_boats = 0
+        for i in boats.values():
+            number_boats += i[0]
         if number_boats == 0:
             break
         print("Donner les cases de début et de fin de votre bateau.")
         print("Il vous reste : ")
         for taille, nombre in boats.items():
-            print("{} bateau(x) de taille {}".format(nombre, taille))
+            print("{} bateau(x) de taille {}".format(nombre[0], taille))
         row1, column1 = squareInput()
         row2, column2 = squareInput()
         if row1 == row2:
@@ -225,7 +235,7 @@ def prepPhase(map, boats):
                 row1,column1+1,row2,column2+1))
     displayMapPrep(map)
 
-def battlePhase(map1, map2, boats):
+'''def battlePhase(map1, map2, boats):
     """Les joueurs choississent à tour de rôle les cases qu'ils veulent attaquer."""
     boatsP1, boatsP2 = boats.copy(), boats.copy()
     displayMaps(mapP1, mapP2)
@@ -254,17 +264,21 @@ def battlePhase(map1, map2, boats):
                     turn = 0
                 except AttackedError:
                     print("Vous avez déjà attaqué cette case.")
-            displayMaps(map1,map2)
+            displayMaps(map1,map2)'''
 
 # Main 
 mapP1 = deepcopy(EMPTY_MAP)
 mapP2 = deepcopy(EMPTY_MAP)
 
-"""print("C'est au tour du joueur 1 de placer ses bateaux.\n")
-prepPhase(mapP1, BOATS.copy())
-print("C'est au tour du joueur 2 de placer ses bateaux.\n")
-prepPhase(mapP2, BOATS.copy())"""
-changeSquares(mapP1, 'B', 1, 5, 2)
-changeSquares(mapP2, 'B', 1, 5, 2)
+boatsP1 = BOATS.copy()
+boatsP2 = BOATS.copy()
 
-battlePhase(mapP1, mapP2, BOATS)
+print("C'est au tour du joueur 1 de placer ses bateaux.\n")
+prepPhase(mapP1, boatsP1)
+print(boatsP1)
+"""print("C'est au tour du joueur 2 de placer ses bateaux.\n")
+prepPhase(mapP2, BOATS.copy())"""
+#changeSquares(mapP1, 'B', 1, 5, 2)
+#changeSquares(mapP2, 'B', 1, 5, 2)
+
+#battlePhase(mapP1, mapP2, BOATS)
