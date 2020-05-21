@@ -118,7 +118,8 @@ def placeOrReset(map, lign, begin, end, boats):
         reset = input("Voulez vous enlever le dernier bateau placé?(o/n) ")
         if reset == 'o':
             resetBoat(map, lign, begin, end, diff, boats)
-        boats[diff].append((lign, begin, end))
+        else:
+            boats[diff].append((lign, begin, end))
     except KeyError:
         print("Erreur! Le bateau n'est pas d'une taille existante.\n")
     except OverlapError:
@@ -126,9 +127,42 @@ def placeOrReset(map, lign, begin, end, boats):
     except NoMoreBoatsError:
         print("Erreur! Il n'y a plus de bateaux de cette taille.\n")
 
-def isSinked(map, row, column):
-    """Regarde si un bateau doit couler."""
-    pass
+def hasNoBoats(boats):
+    """Regarde si il reste des bateaux à un des joueurs."""
+    noBoats = True
+    for i in boats.values():
+        noBoats = noBoats and len(i) == 1
+    return noBoats
+
+def sinkBoat(map, row, column, boats):
+    """Fait couler un bateau."""
+    for i in boats.values():
+        for j in i[1:]:
+            isSinked = True
+            lign, begin, end = j
+            if row == lign:
+                if column in range(begin, end+1):
+                    for otherLign in range(begin, end+1):
+                        isSinked = isSinked and map[lign][otherLign] == 3
+                    if isSinked:
+                        j_index = i.index(j)
+                        lign, begin, end = i.pop(j_index)
+                        print("Le bateau allant de {}{} à {}{} est coulé!".format(
+                            lign, begin, lign, end))
+                        changeSquares(map, lign, begin, end, 4)
+            if column == lign:
+                begin = COLUMN_IDENTIFIERS.index(begin)
+                end = COLUMN_IDENTIFIERS.index(end)
+                row = COLUMN_IDENTIFIERS.index(row)
+                if row in range(begin, end+1):
+                    for otherLign in COLUMN_IDENTIFIERS[begin:end+1]:
+                        isSinked = isSinked and map[otherLign][lign] == 3
+                    if isSinked:
+                        j_index = i.index(j)
+                        lign, begin, end = i.pop(j_index)
+                        print("Le bateau allant de {}{} à {}{} est coulé!".format(
+                            lign, begin, lign, end))
+                        changeSquares(map, lign, begin, end, 4)
 
 def attackSquare(map, row, column, boats):
     """Attaque d'une case par un joueur. Cela modifie l'état de cette case."""
@@ -139,7 +173,7 @@ def attackSquare(map, row, column, boats):
     elif value == 2:
         print("Touché! C'est réussi.\n")
         map[row][column] = 3
-        isSinked(map, row, column)
+        sinkBoat(map, row, column, boats)
     else:
         raise AttackedError
 
@@ -235,19 +269,22 @@ def prepPhase(map, boats):
                 row1,column1+1,row2,column2+1))
     displayMapPrep(map)
 
-'''def battlePhase(map1, map2, boats):
+def battlePhase(map1, map2, boatsP1, boatsP2):
     """Les joueurs choississent à tour de rôle les cases qu'ils veulent attaquer."""
-    boatsP1, boatsP2 = boats.copy(), boats.copy()
     displayMaps(mapP1, mapP2)
     while True:
-        noBoatsP1 = sum(boatsP1.values()) == 0
-        noBoatsP2 = sum(boatsP2.values()) == 0
-        if noBoatsP1:
+        noBoatsP1 = hasNoBoats(boatsP1)
+        noBoatsP2 = hasNoBoats(boatsP2)
+        if noBoatsP1 and noBoatsP2:
+            print("Match nul!")
+            break
+        elif noBoatsP1:
             print("Le joueur 2 a gagné !")
             break
         elif noBoatsP2:
             print("Le joueur 1 a gagné !")
             break
+        
         for turn in range(1,3):
             print("Joueur " + str(turn) + ", attaquez une case.")
             while turn == 1:
@@ -260,25 +297,23 @@ def prepPhase(map, boats):
             while turn == 2:
                 try:
                     row, column = squareInput()
-                    attackSquare(map1, row, column, boatsP2)
+                    attackSquare(map1, row, column, boatsP1)
                     turn = 0
                 except AttackedError:
                     print("Vous avez déjà attaqué cette case.")
-            displayMaps(map1,map2)'''
+            displayMaps(map1,map2)
 
 # Main 
 mapP1 = deepcopy(EMPTY_MAP)
 mapP2 = deepcopy(EMPTY_MAP)
 
-boatsP1 = BOATS.copy()
-boatsP2 = BOATS.copy()
+boatsP1 = deepcopy(BOATS)
+boatsP2 = deepcopy(BOATS)
 
 print("C'est au tour du joueur 1 de placer ses bateaux.\n")
 prepPhase(mapP1, boatsP1)
-print(boatsP1)
-"""print("C'est au tour du joueur 2 de placer ses bateaux.\n")
-prepPhase(mapP2, BOATS.copy())"""
-#changeSquares(mapP1, 'B', 1, 5, 2)
-#changeSquares(mapP2, 'B', 1, 5, 2)
 
-#battlePhase(mapP1, mapP2, BOATS)
+print("C'est au tour du joueur 2 de placer ses bateaux.\n")
+prepPhase(mapP2, boatsP2)
+
+battlePhase(mapP1, mapP2, boatsP1, boatsP2)
