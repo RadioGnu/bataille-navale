@@ -8,7 +8,7 @@ Description:
 # Importations
 from copy import deepcopy   #Pour que les cartes des joueurs soient différentes, la méthode .copy() ne marche pas.
 
-from display import displayMapPrep, displayMaps
+from display import displayMapPrep, displayMaps, clear
 
 # Constantes
 
@@ -43,7 +43,7 @@ def squareInput():
     while True:
         try:
             square = input("Donner la case(ligne, colonne): ")
-            row = square[0]        #row prend le premier caractère.
+            row = square[0].upper()        #row prend le premier caractère.
             column = int(square[1:])  #column prend le reste des caractères, convertit en entier.
             test_squ = EMPTY_MAP[row][int(column)-1]
             return (row, column-1)
@@ -150,7 +150,7 @@ def sinkBoat(map, row, column, boats):
                         j_index = i.index(j)
                         lign, begin, end = i.pop(j_index)
                         print("Le bateau allant de {}{} à {}{} est coulé!".format(
-                            lign, begin, lign, end))
+                            lign, begin+1, lign, end+1))
                         changeSquares(map, lign, begin, end, 4)
             if column == lign:
                 begin = COLUMN_IDENTIFIERS.index(begin)
@@ -163,7 +163,7 @@ def sinkBoat(map, row, column, boats):
                         j_index = i.index(j)
                         lign, begin, end = i.pop(j_index)
                         print("Le bateau allant de {}{} à {}{} est coulé!".format(
-                            lign, begin, lign, end))
+                            begin, lign+1, end, lign+1))
                         changeSquares(map, lign, begin, end, 4)
 
 def attackSquare(map, row, column, boats):
@@ -197,6 +197,7 @@ def prepPhase(map, boats):
             print("{} bateau(x) de taille {}".format(nombre[0], taille))
         row1, column1 = squareInput()
         row2, column2 = squareInput()
+        clear()
         if row1 == row2:
             if isBigger(column1, column2):
                 placeOrReset(map, row1, column2, column1, boats)                  
@@ -211,6 +212,10 @@ def prepPhase(map, boats):
             print("Erreur! Les cases {}{} et {}{} ne sont pas alignées.\n".format(
                 row1,column1+1,row2,column2+1))
     displayMapPrep(map)
+    screenclean = input("Voulez-vous effacer la carte? (o/n)")
+    while screenclean not in ('o', 'O'):
+        screenclean = input("Voulez-vous effacer la carte? (o/n)")
+    clear()
 
 def battlePhase(map1, map2, boatsP1, boatsP2):
     """Les joueurs choississent à tour de rôle les cases qu'ils veulent attaquer."""
@@ -233,6 +238,7 @@ def battlePhase(map1, map2, boatsP1, boatsP2):
             while turn == 1:
                 try:
                     row, column = squareInput()
+                    clear()
                     attackSquare(map2, row, column, boatsP2)
                     turn = 0    #Le tour est passé
                 except AttackedError:
@@ -240,6 +246,7 @@ def battlePhase(map1, map2, boatsP1, boatsP2):
             while turn == 2:
                 try:
                     row, column = squareInput()
+                    clear()
                     attackSquare(map1, row, column, boatsP1)
                     turn = 0
                 except AttackedError:

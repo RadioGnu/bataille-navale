@@ -1,5 +1,13 @@
 """Un module pour l'affichage du programme."""
 
+import os
+
+def clear():
+    if os.name =='nt':
+        os.system('cls')
+    else:
+        os.system('clear') 
+
 def displaySquare(square, beginning=False):
     """Renvoie l'affichage de la case par rapport à sa valeur.\n
     -0: Case vide non révélée.
