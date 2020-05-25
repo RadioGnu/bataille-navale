@@ -37,15 +37,14 @@ class AttackedError(Exception):
 # Fonctions
 
 ## Fonctions d'input
-def squareInput():
-    """Fonction qui demande une case à l'utilisateur, et convertit la chaine en tuple.\n
-    Dépend de EMPTY_MAP."""
+def squareInput(map):
+    """Fonction qui demande une case à l'utilisateur, et convertit la chaine en tuple.\n"""
     while True:
         try:
             square = input("Donner la case(ligne, colonne): ")
             row = square[0].upper()        #row prend le premier caractère.
             column = int(square[1:])  #column prend le reste des caractères, convertit en entier.
-            test_squ = EMPTY_MAP[row][int(column)-1]
+            test_squ = map[row][int(column)-1]
             return (row, column-1)
         except ValueError:
             print("Erreur! Plus ou moins de deux caractères, ou colonne qui n'est pas un nombre.\n")
@@ -86,13 +85,14 @@ def changeSquares(map, lign, begin, end, value):
         for otherLign in range(begin, end+1):
             map[lign][otherLign] = value
     if type(lign) is int:
-        begin = COLUMN_IDENTIFIERS.index(begin)
-        end = COLUMN_IDENTIFIERS.index(end)
+        identifiers = map.keys()
+        begin = identifiers.index(begin)
+        end = identifiers.index(end)
         if value == 2:
-            for otherLign in COLUMN_IDENTIFIERS[begin:end+1]:
+            for otherLign in identifiers[begin:end+1]:
                 if map[otherLign][lign] == 2:
                     raise OverlapError
-        for otherLign in COLUMN_IDENTIFIERS[begin:end+1]:
+        for otherLign in identifiers[begin:end+1]:
             map[otherLign][lign] = value
 
 def placeBoat(map, lign, begin, end, diff, boats):
@@ -138,30 +138,29 @@ def hasNoBoats(boats):
 
 def sinkBoat(map, row, column, boats):
     """Fait couler un bateau."""
-    for i in boats.values():
-        for j in i[1:]:
+    for coords in boats.values():
+        for index, boat in enumerate(coords):
             isSinked = True
-            lign, begin, end = j
+            lign, begin, end = boat
             if row == lign:
                 if column in range(begin, end+1):
                     for otherLign in range(begin, end+1):
                         isSinked = isSinked and map[lign][otherLign] == 3
                     if isSinked:
-                        j_index = i.index(j)
-                        lign, begin, end = i.pop(j_index)
+                        lign, begin, end = coords.pop(index)
                         print("Le bateau allant de {}{} à {}{} est coulé!".format(
                             lign, begin+1, lign, end+1))
                         changeSquares(map, lign, begin, end, 4)
             if column == lign:
-                begin = COLUMN_IDENTIFIERS.index(begin)
-                end = COLUMN_IDENTIFIERS.index(end)
-                row = COLUMN_IDENTIFIERS.index(row)
+                identifiers = map.keys()
+                begin = identifiers.index(begin)
+                end = identifiers.index(end)
+                row = identifiers.index(row)
                 if row in range(begin, end+1):
-                    for otherLign in COLUMN_IDENTIFIERS[begin:end+1]:
+                    for otherLign in identifiers[begin:end+1]:
                         isSinked = isSinked and map[otherLign][lign] == 3
                     if isSinked:
-                        j_index = i.index(j)
-                        lign, begin, end = i.pop(j_index)
+                        lign, begin, end = coords.pop(index)
                         print("Le bateau allant de {}{} à {}{} est coulé!".format(
                             begin, lign+1, end, lign+1))
                         changeSquares(map, lign, begin, end, 4)
@@ -184,19 +183,22 @@ def attackSquare(map, row, column, boats):
 def prepPhase(map, boats):
     """Prépare la carte pour un des joueurs.
     C'est la phase de placement des bateaux."""
-    displayMapPrep(EMPTY_MAP)
+    displayMapPrep(map)
     while True:
         number_boats = 0
-        for i in boats.values():
-            number_boats += i[0]
+        for boat in boats.values():
+            number_boats += boat[0]
         if number_boats == 0:
+            for boat in boats.values():
+                del boat[0]     #On enlève le nombre de bateaux, qui n'est plus nécessaire par la suite.
+                print(boats)
             break
         print("Donner les cases de début et de fin de votre bateau.")
         print("Il vous reste : ")
         for taille, nombre in boats.items():
             print("{} bateau(x) de taille {}".format(nombre[0], taille))
-        row1, column1 = squareInput()
-        row2, column2 = squareInput()
+        row1, column1 = squareInput(map)
+        row2, column2 = squareInput(map)
         clear()
         if row1 == row2:
             if isBigger(column1, column2):
@@ -217,12 +219,12 @@ def prepPhase(map, boats):
         screenclean = input("Voulez-vous effacer la carte? (o/n)")
     clear()
 
-def battlePhase(map1, map2, boatsP1, boatsP2):
+def battlePhase(map1, map2, boats1, boats2):
     """Les joueurs choississent à tour de rôle les cases qu'ils veulent attaquer."""
-    displayMaps(mapP1, mapP2)
+    displayMaps(map1, map2)
     while True:
-        noBoatsP1 = hasNoBoats(boatsP1)
-        noBoatsP2 = hasNoBoats(boatsP2)
+        noBoatsP1 = hasNoBoats(boats1)
+        noBoatsP2 = hasNoBoats(boats2)
         if noBoatsP1 and noBoatsP2:
             print("Match nul!")
             break
@@ -237,17 +239,17 @@ def battlePhase(map1, map2, boatsP1, boatsP2):
             print("Joueur " + str(turn) + ", attaquez une case.")
             while turn == 1:
                 try:
-                    row, column = squareInput()
+                    row, column = squareInput(map2)
                     clear()
-                    attackSquare(map2, row, column, boatsP2)
+                    attackSquare(map2, row, column, boats2)
                     turn = 0    #Le tour est passé
                 except AttackedError:
                     print("Vous avez déjà attaqué cette case.")
             while turn == 2:
                 try:
-                    row, column = squareInput()
+                    row, column = squareInput(map1)
                     clear()
-                    attackSquare(map1, row, column, boatsP1)
+                    attackSquare(map1, row, column, boats1)
                     turn = 0
                 except AttackedError:
                     print("Vous avez déjà attaqué cette case.")
