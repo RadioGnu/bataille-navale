@@ -20,7 +20,6 @@ for i in COLUMN_IDENTIFIERS:
     EMPTY_MAP[i] = EMPTY_ROW.copy()
 BOATS = {2:[1], 3:[2], 4:[1], 5:[1]}    #Les bateaux organisés sous la forme taille:nombre
 
-
 ## Fonctions principales
 
 def prepPhase(map, boats):

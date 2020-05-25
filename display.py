@@ -1,4 +1,4 @@
-"""Un module pour l'affichage du programme."""
+"""Module pour l'affichage du programme."""
 
 import os
 

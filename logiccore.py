@@ -1,3 +1,5 @@
+"""Module logique du programme."""
+
 # Erreurs
 class OverlapError(Exception):
     """Erreur quand on essaye de placer une case bateau sur une case
