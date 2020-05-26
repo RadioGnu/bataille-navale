@@ -7,7 +7,11 @@ Description:
 
 # Importations
 from copy import deepcopy   #Pour que les cartes des joueurs soient totalement indépendantes.
-import tkinter as tk
+try:
+    import tkinter as tk
+    isGraphical = graphical()
+except ImportError:
+    isGraphical = False
 
 from display import displayMapPrep, displayMaps, clear
 from logiccore import *
@@ -170,7 +174,6 @@ mapP2 = deepcopy(EMPTY_MAP)
 boatsP1 = deepcopy(BOATS)
 boatsP2 = deepcopy(BOATS)
 
-isGraphical = graphical()
 if isGraphical:
     window = tk.Tk()
     window.title("Bataille navale")
