@@ -17,23 +17,6 @@ class AttackedError(Exception):
 
 # Fonctions
 
-## Fonctions d'input
-def squareInput(map):
-    """Fonction qui demande une case à l'utilisateur, et convertit la chaine en tuple.\n"""
-    while True:
-        try:
-            square = input("Donner la case(ligne, colonne): ")
-            row = square[0].upper()   #row prend le premier caractère.
-            column = int(square[1:])  #column prend le reste des caractères, convertit en entier.
-            test_squ = map[row][int(column)-1]  #On teste si la case appartient bien à la carte.
-            return (row, column-1)
-        except ValueError:
-            print("Erreur! Plus ou moins de deux caractères, ou colonne qui n'est pas un nombre.\n")
-        except KeyError:
-            print("Erreur! La case {} n'est pas sur la grille.\n".format(square))
-        except IndexError:
-            print("Erreur! La case {} n'est pas sur la grille.\n".format(square))
-
 ## Fonctions d'exécution
 
 def isBigger(coord1, coord2):
@@ -66,7 +49,7 @@ def changeSquares(map, lign, begin, end, value):
         for otherLign in range(begin, end+1):
             map[lign][otherLign] = value
     if type(lign) is int:
-        identifiers = map.keys()
+        identifiers = list(map.keys())
         begin = identifiers.index(begin)
         end = identifiers.index(end)
         if value == 2:
@@ -91,24 +74,6 @@ def resetBoat(map, lign, begin, end, diff, boats):
     boats[diff][0] += 1    #On remet le bateau dans le compteur
     changeSquares(map, lign, begin, end, 0)
 
-def placeOrReset(map, lign, begin, end, boats):
-    """Place le bateau demandé par l'utilisateur et lui demande si
-    il veut l'enlever."""
-    try:
-        diff = difference(begin, end)
-        placeBoat(map, lign, begin, end, diff, boats)
-        reset = input("Voulez vous enlever le dernier bateau placé?(o/n) ")
-        if reset == 'o':
-            resetBoat(map, lign, begin, end, diff, boats)
-        else:
-            boats[diff].append((lign, begin, end))
-    except KeyError:
-        print("Erreur! Le bateau n'est pas d'une taille existante.\n")
-    except OverlapError:
-        print("Erreur! Il y a un déjà un bateau sur une des cases.\n")
-    except NoMoreBoatsError:
-        print("Erreur! Il n'y a plus de bateaux de cette taille.\n")
-
 def hasNoBoats(boats):
     """Regarde si il reste des bateaux à un des joueurs."""
     noBoats = True
@@ -128,9 +93,10 @@ def sinkBoat(map, row, column, boats):
                         isSinked = isSinked and map[lign][otherLign] == 3
                     if isSinked:
                         lign, begin, end = coords.pop(index)
-                        print("Le bateau allant de {}{} à {}{} est coulé!".format(
-                            lign, begin+1, lign, end+1))
+                        msg = "Le bateau allant de {}{} à {}{} est coulé!".format(
+                            lign, begin+1, lign, end+1)
                         changeSquares(map, lign, begin, end, 4)
+                        return msg
             if column == lign:
                 identifiers = map.keys()
                 begin = identifiers.index(begin)
@@ -141,19 +107,8 @@ def sinkBoat(map, row, column, boats):
                         isSinked = isSinked and map[otherLign][lign] == 3
                     if isSinked:
                         lign, begin, end = coords.pop(index)
-                        print("Le bateau allant de {}{} à {}{} est coulé!".format(
-                            begin, lign+1, end, lign+1))
+                        msg = "Le bateau allant de {}{} à {}{} est coulé!".format(
+                            begin, lign+1, end, lign+1)
                         changeSquares(map, lign, begin, end, 4)
-
-def attackSquare(map, row, column, boats):
-    """Attaque d'une case par un joueur. Cela modifie l'état de cette case."""
-    value = map[row][column]
-    if value == 0:
-        print("Plouf! C'est raté.\n")
-        map[row][column] = 1
-    elif value == 2:
-        print("Touché! C'est réussi.\n")
-        map[row][column] = 3
-        sinkBoat(map, row, column, boats)
-    else:
-        raise AttackedError
+                        return msg
+    return ""
