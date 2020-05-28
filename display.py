@@ -3,6 +3,7 @@
 import os
 
 def clear():
+    """Enlève tout ce qui est à l'écran."""
     if os.name =='nt':
         os.system('cls')
     else:
@@ -26,7 +27,7 @@ def displaySquare(square, beginning=False):
     elif square == 3:
         return 'o'
     elif square == 4:
-        return 'c'
+        return 'C'
 
 def displayMapPrep(map):
     """Affiche la carte d'un des joueurs, avec les emplacements des bateaux.
