@@ -7,11 +7,11 @@ Description:
 
 # Importations
 from copy import deepcopy   #Pour que les cartes des joueurs soient totalement indépendantes.
-try:
+"""try:
     import tkinter as tk
     hasGraphics = True
 except ImportError:
-    hasGraphics = False
+    hasGraphics = False"""
 
 from display import displayMapPrep, displayMaps, clear
 from logiccore import *
@@ -34,14 +34,11 @@ def graphical():
     else:
         return False
 
-def squareInput(map, graphic_mode=False, entry = None):
+def squareInput(map):
     """Fonction qui demande une case à l'utilisateur, et convertit la chaine en tuple.\n"""
     while True:
         try:
-            if graphic_mode:
-                square = entry.get()
-            else:
-                square = input("Donner la case(ligne, colonne): ")
+            square = input("Donner la case(ligne, colonne): ")
             row = square[0].upper()   #row prend le premier caractère.
             column = int(square[1:])  #column prend le reste des caractères, convertit en entier.
             test_squ = map[row][int(column)-1]  #On teste si la case appartient bien à la carte.
@@ -53,28 +50,24 @@ def squareInput(map, graphic_mode=False, entry = None):
         except IndexError:
             print("Erreur! La case {} n'est pas sur la grille.\n".format(square))
 
-def wantsReset(graphic_mode):
+def wantsReset():
     """Demande à l'utilisateur si il veut enlever son bateau."""
-    if graphic_mode:
-        return False
+    reset = input("Voulez vous enlever le dernier bateau placé?(o/n) ")
+    if reset in ('o', 'O'):
+        return True
     else:
-        reset = input("Voulez vous enlever le dernier bateau placé?(o/n) ")
-        if reset in ('o', 'O'):
-            return True
-        else:
-            return False
+        return False
 
 ## Fonctions d'exécution
 
-def placeOrReset(map, lign, begin, end, boats, graphic_mode):
+def placeOrReset(map, lign, begin, end, boats):
     """Place le bateau demandé par l'utilisateur et lui demande si
     il veut l'enlever."""
     try:
         diff = difference(begin, end)
         placeBoat(map, lign, begin, end, diff, boats)
         displayMapPrep(map)
-        reset = wantsReset(graphic_mode)
-        if reset:
+        if wantsReset():
             resetBoat(map, lign, begin, end, diff, boats)
         else:
             boats[diff].append((lign, begin, end))
@@ -101,7 +94,7 @@ def attackSquare(map, row, column, boats):
 
 ##Fonctions principales
 
-def prepPhase(map, boats, graphic_mode, entry1=None):
+def prepPhase(map, boats):
     """Prépare la carte pour un des joueurs.
     C'est la phase de placement des bateaux."""
     displayMapPrep(map)
@@ -119,19 +112,19 @@ def prepPhase(map, boats, graphic_mode, entry1=None):
             boatsLeft += "{} bateau(x) de taille {}\n".format(nombre[0], taille)
         print(boatsLeft)
         print("Donner les cases de début et de fin de votre bateau.")
-        row1, column1 = squareInput(map, graphic_mode, entry1)
-        row2, column2 = squareInput(map, graphic_mode, entry1)
+        row1, column1 = squareInput(map)
+        row2, column2 = squareInput(map)
         clear()
         if row1 == row2:
             if isBigger(column1, column2):
-                placeOrReset(map, row1, column2, column1, boats, graphic_mode)                  
+                placeOrReset(map, row1, column2, column1, boats)                  
             else:
-                placeOrReset(map, row1, column1, column2, boats, graphic_mode)
+                placeOrReset(map, row1, column1, column2, boats)
         elif column1 == column2:
             if isBigger(row1, row2):
-                placeOrReset(map, column1, row2, row1, boats, graphic_mode)
+                placeOrReset(map, column1, row2, row1, boats)
             else:
-                placeOrReset(map, column1, row1, row2, boats, graphic_mode)
+                placeOrReset(map, column1, row1, row2, boats)
         elif row1 != row2 and column1 != column2:
             print("Erreur! Les cases {}{} et {}{} ne sont pas alignées.\n".format(
                 row1,column1+1,row2,column2+1))
@@ -185,7 +178,7 @@ mapP2 = deepcopy(EMPTY_MAP)
 boatsP1 = deepcopy(BOATS)
 boatsP2 = deepcopy(BOATS)
 
-if hasGraphics:
+"""if hasGraphics:
     wantsGraphics = graphical()
 else:
     wantsGraphics = hasGraphics
@@ -197,12 +190,12 @@ if wantsGraphics:
     window.minsize(480,360)
     window.config(background="#607c8e")
     
-    window.mainloop()
-else:
-    print("C'est au tour du joueur 1 de placer ses bateaux.\n")
-    prepPhase(mapP1, boatsP1, False)
+    window.mainloop()"""
 
-    print("C'est au tour du joueur 2 de placer ses bateaux.\n")
-    prepPhase(mapP2, boatsP2, False)
+print("C'est au tour du joueur 1 de placer ses bateaux.\n")
+prepPhase(mapP1, boatsP1)
 
-    battlePhase(mapP1, mapP2, boatsP1, boatsP2)
+print("C'est au tour du joueur 2 de placer ses bateaux.\n")
+prepPhase(mapP2, boatsP2)
+
+battlePhase(mapP1, mapP2, boatsP1, boatsP2)
