@@ -9,9 +9,9 @@ Description:
 from copy import deepcopy   #Pour que les cartes des joueurs soient totalement indépendantes.
 try:
     import tkinter as tk
-    isGraphical = graphical()
+    hasGraphics = True
 except ImportError:
-    isGraphical = False
+    hasGraphics = False
 
 from display import displayMapPrep, displayMaps, clear
 from logiccore import *
@@ -40,7 +40,6 @@ def squareInput(map, graphic_mode=False, entry = None):
         try:
             if graphic_mode:
                 square = entry.get()
-                print('square')
             else:
                 square = input("Donner la case(ligne, colonne): ")
             row = square[0].upper()   #row prend le premier caractère.
@@ -174,7 +173,12 @@ mapP2 = deepcopy(EMPTY_MAP)
 boatsP1 = deepcopy(BOATS)
 boatsP2 = deepcopy(BOATS)
 
-if isGraphical:
+if hasGraphics:
+    wantsGraphics = graphical()
+else:
+    wantsGraphics = hasGraphics
+
+if wantsGraphics:
     window = tk.Tk()
     window.title("Bataille navale")
     window.geometry("1360x720")
