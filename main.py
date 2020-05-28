@@ -53,17 +53,28 @@ def squareInput(map, graphic_mode=False, entry = None):
         except IndexError:
             print("Erreur! La case {} n'est pas sur la grille.\n".format(square))
 
+def wantsReset(graphic_mode):
+    """Demande à l'utilisateur si il veut enlever son bateau."""
+    if graphic_mode:
+        return False
+    else:
+        reset = input("Voulez vous enlever le dernier bateau placé?(o/n) ")
+        if reset in ('o', 'O'):
+            return True
+        else:
+            return False
+
 ## Fonctions d'exécution
 
-def placeOrReset(map, lign, begin, end, boats):
+def placeOrReset(map, lign, begin, end, boats, graphic_mode):
     """Place le bateau demandé par l'utilisateur et lui demande si
     il veut l'enlever."""
     try:
         diff = difference(begin, end)
         placeBoat(map, lign, begin, end, diff, boats)
         displayMapPrep(map)
-        reset = input("Voulez vous enlever le dernier bateau placé?(o/n) ")
-        if reset == 'o':
+        reset = wantsReset(graphic_mode)
+        if reset:
             resetBoat(map, lign, begin, end, diff, boats)
         else:
             boats[diff].append((lign, begin, end))
@@ -90,7 +101,7 @@ def attackSquare(map, row, column, boats):
 
 ##Fonctions principales
 
-def prepPhase(map, boats):
+def prepPhase(map, boats, graphic_mode, entry1=None):
     """Prépare la carte pour un des joueurs.
     C'est la phase de placement des bateaux."""
     displayMapPrep(map)
@@ -103,23 +114,24 @@ def prepPhase(map, boats):
                 del boat[0]     #On enlève le nombre de bateaux, qui n'est plus nécessaire par la suite.
                 print(boats)
             break
-        print("Donner les cases de début et de fin de votre bateau.")
-        print("Il vous reste : ")
+        boatsLeft = "Il vous reste : \n"
         for taille, nombre in boats.items():
-            print("{} bateau(x) de taille {}".format(nombre[0], taille))
-        row1, column1 = squareInput(map)
-        row2, column2 = squareInput(map)
+            boatsLeft += "{} bateau(x) de taille {}\n".format(nombre[0], taille)
+        print(boatsLeft)
+        print("Donner les cases de début et de fin de votre bateau.")
+        row1, column1 = squareInput(map, graphic_mode, entry1)
+        row2, column2 = squareInput(map, graphic_mode, entry1)
         clear()
         if row1 == row2:
             if isBigger(column1, column2):
-                placeOrReset(map, row1, column2, column1, boats)                  
+                placeOrReset(map, row1, column2, column1, boats, graphic_mode)                  
             else:
-                placeOrReset(map, row1, column1, column2, boats)
+                placeOrReset(map, row1, column1, column2, boats, graphic_mode)
         elif column1 == column2:
             if isBigger(row1, row2):
-                placeOrReset(map, column1, row2, row1, boats)
+                placeOrReset(map, column1, row2, row1, boats, graphic_mode)
             else:
-                placeOrReset(map, column1, row1, row2, boats)
+                placeOrReset(map, column1, row1, row2, boats, graphic_mode)
         elif row1 != row2 and column1 != column2:
             print("Erreur! Les cases {}{} et {}{} ne sont pas alignées.\n".format(
                 row1,column1+1,row2,column2+1))
@@ -181,19 +193,16 @@ else:
 if wantsGraphics:
     window = tk.Tk()
     window.title("Bataille navale")
-    window.geometry("1360x720")
+    window.geometry("1080x720")
+    window.minsize(480,360)
+    window.config(background="#607c8e")
     
-    entry = tk.Entry(window)
-    entry.pack()
-    button = tk.Button(window, text="Donner la case(ligne, colonne)", 
-                    command=lambda: squareInput(EMPTY_MAP, True, entry))
-    button.pack()
     window.mainloop()
 else:
     print("C'est au tour du joueur 1 de placer ses bateaux.\n")
-    prepPhase(mapP1, boatsP1)
+    prepPhase(mapP1, boatsP1, False)
 
     print("C'est au tour du joueur 2 de placer ses bateaux.\n")
-    prepPhase(mapP2, boatsP2)
+    prepPhase(mapP2, boatsP2, False)
 
     battlePhase(mapP1, mapP2, boatsP1, boatsP2)
