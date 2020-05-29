@@ -99,7 +99,7 @@ def attackSquare(map, row, column, boats):
     elif value == 2:
         print("Touché! C'est réussi.\n")
         map[row][column] = 3
-        message = sinkBoat(map, row, column, boats)
+        message = checkSinkedAndSink(map, row, column, boats)
         print(message)
     else:
         raise AttackedError

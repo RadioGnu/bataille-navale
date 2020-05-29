@@ -109,7 +109,6 @@ def checkSinkedAndSink(map, row, column, boats):
                 identifiers = map.keys()
                 begin = identifiers.index(begin)
                 end = identifiers.index(end)
-                row = identifiers.index(row)
                 for otherLign in identifiers[begin:end+1]:
                     isSinked = isSinked and map[otherLign][lign] == 3
                 if isSinked:
