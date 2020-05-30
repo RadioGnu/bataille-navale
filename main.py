@@ -35,7 +35,7 @@ BOATS = {2:[1], 3:[2], 4:[1], 5:[1]}    #Les bateaux organisés sous la forme ta
     else:
         return False'''
 
-def squareInput(map):
+def squareInput(mapP):
     """Fonction qui demande une case à l'utilisateur, et convertit la chaine en tuple.\n"""
     while True:
         try:
@@ -44,7 +44,7 @@ def squareInput(map):
             if square[1] == '-':
                 print("Erreur! Pas de nombres négatifs.")
             column = int(square[1:])  #column prend le reste des caractères, convertis en entier.
-            test_squ = map[row][column-1]  #Si la case n'est pas sur la carte, il y a KeyError
+            test_squ = mapP[row][column-1]  #Si la case n'est pas sur la carte, il y a KeyError
             return (row, column-1)
         except ValueError:
             print("Erreur! Plus ou moins de deux caractères, ou colonne qui n'est pas un nombre.\n")
@@ -66,21 +66,21 @@ def screenClean():
     après avoir placé tous ses bateaux."""
     screenClean = ""
     while screenClean not in ('o', 'O'):
-        screenClean = input("Voulez-vous effacer la carte? (o/n)")
+        screenClean = input("Voulez-vous passer au joueur suivant? (o/n)")
         print("\n")
     return True
 
 ## Fonctions d'exécution
 
-def placeOrReset(map, lign, begin, end, boats):
+def placeOrReset(mapP, lign, begin, end, boats):
     """Place le bateau demandé par l'utilisateur et lui demande si
     il veut l'enlever."""
     try:
         diff = difference(begin, end)
-        placeBoat(map, lign, begin, end, diff, boats)
-        displayMapPrep(map)
+        placeBoat(mapP, lign, begin, end, diff, boats)
+        displayMapPrep(mapP)
         if wantsReset():
-            resetBoat(map, lign, begin, end, diff, boats)
+            resetBoat(mapP, lign, begin, end, diff, boats)
         else:
             boats[diff].append((lign, begin, end))
     except KeyError:
@@ -90,26 +90,26 @@ def placeOrReset(map, lign, begin, end, boats):
     except NoMoreBoatsError:
         print("Erreur! Il n'y a plus de bateaux de cette taille.\n")
 
-def attackSquare(map, row, column, boats):
+def attackSquare(mapP, row, column, boats):
     """Attaque d'une case par un joueur. Cela modifie l'état de cette case."""
-    value = map[row][column]
+    value = mapP[row][column]
     if value == 0:
         print("Plouf! C'est raté.\n")
-        map[row][column] = 1
+        mapP[row][column] = 1
     elif value == 2:
         print("Touché! C'est réussi.\n")
-        map[row][column] = 3
-        message = checkSinkedAndSink(map, row, column, boats)
+        mapP[row][column] = 3
+        message = checkSinkedAndSink(mapP, row, column, boats)
         print(message)
     else:
         raise AttackedError
 
 ##Fonctions principales
 
-def prepPhase(map, boats):
+def prepPhase(mapP, boats):
     """Prépare la carte pour un des joueurs.
     C'est la phase de placement des bateaux."""
-    displayMapPrep(map)
+    displayMapPrep(mapP)
     while True:
         number_boats = 0    #Il s'agit du nombre de bateaux qu'il reste à placer.
         for boat in boats.values():
@@ -117,30 +117,29 @@ def prepPhase(map, boats):
         if number_boats == 0:
             for boat in boats.values():
                 del boat[0]     #On enlève le nombre de bateaux à placer, qui n'est plus nécessaire par la suite.
-                print(boats)
             break
         boatsLeft = "Il vous reste : \n"
         for taille, nombre in boats.items():
             boatsLeft += "{} bateau(x) de taille {}\n".format(nombre[0], taille)
         print(boatsLeft)
         print("Donner les cases de début et de fin de votre bateau.")
-        row1, column1 = squareInput(map)
-        row2, column2 = squareInput(map)
+        row1, column1 = squareInput(mapP)
+        row2, column2 = squareInput(mapP)
         clear()
         if row1 == row2:    
             if isBigger(column1, column2):
-                placeOrReset(map, row1, column2, column1, boats)                  
+                placeOrReset(mapP, row1, column2, column1, boats)                  
             else:
-                placeOrReset(map, row1, column1, column2, boats)
+                placeOrReset(mapP, row1, column1, column2, boats)
         elif column1 == column2:
             if isBigger(row1, row2):
-                placeOrReset(map, column1, row2, row1, boats)
+                placeOrReset(mapP, column1, row2, row1, boats)
             else:
-                placeOrReset(map, column1, row1, row2, boats)
+                placeOrReset(mapP, column1, row1, row2, boats)
         elif row1 != row2 and column1 != column2:   #Par exemple A1 et E5 ne sont pas alignées.
             print("Erreur! Les cases {}{} et {}{} ne sont pas alignées.\n".format(
                 row1,column1+1,row2,column2+1))
-    displayMapPrep(map)
+    displayMapPrep(mapP)
     if screenClean():
         clear()
 

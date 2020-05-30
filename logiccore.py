@@ -39,29 +39,29 @@ def difference(coord1, coord2):
         diff = ord(coord2) - ord(coord1) +1
     return diff
 
-def changeSquares(map, lign, begin, end, value):
+def changeSquares(mapP, lign, begin, end, value):
     """Change plusieurs cases, sur la carte map, 
     sur la ligne lign, de begin à end.
     Si il y a déjà un bateau sur une des cases, appelle OverlapError."""
     if type(lign) is str:
         if value == 2:      #On essaye de placer un bateau, donc on vérifie si il y en a déjà un.
             for otherLign in range(begin, end+1):
-                if map[lign][otherLign] == 2:
+                if mapP[lign][otherLign] == 2:
                     raise OverlapError
         for otherLign in range(begin, end+1):
-            map[lign][otherLign] = value
+            mapP[lign][otherLign] = value
     elif type(lign) is int:
-        identifiers = list(map.keys())
+        identifiers = list(mapP.keys())
         begin = identifiers.index(begin)
         end = identifiers.index(end)
         if value == 2:
             for otherLign in identifiers[begin:end+1]:
-                if map[otherLign][lign] == 2:
+                if mapP[otherLign][lign] == 2:
                     raise OverlapError
         for otherLign in identifiers[begin:end+1]:
-            map[otherLign][lign] = value
+            mapP[otherLign][lign] = value
 
-def placeBoat(map, lign, begin, end, diff, boats):
+def placeBoat(mapP, lign, begin, end, diff, boats):
     """Place un bateau en vérifiant si il n'y a pas déjà
     de bateau là où il est placé."""
     noBoats = boats[diff][0] == 0   #Il n'y a plus de bateaux de la taille demandée.
@@ -69,29 +69,29 @@ def placeBoat(map, lign, begin, end, diff, boats):
         raise NoMoreBoatsError
     else:
         boats[diff][0] -= 1
-        changeSquares(map, lign, begin, end, 2)
+        changeSquares(mapP, lign, begin, end, 2)
 
-def resetBoat(map, lign, begin, end, diff, boats):
+def resetBoat(mapP, lign, begin, end, diff, boats):
     """Enlève un bateau de la carte."""
     boats[diff][0] += 1    #On remet le bateau dans le compteur
-    changeSquares(map, lign, begin, end, 0)
+    changeSquares(mapP, lign, begin, end, 0)
 
 def hasNoBoats(boats):
     """Regarde si il reste des bateaux à un des joueurs.
     Pendant la phase de bataille."""
     noBoats = True
     for i in boats.values():
-        noBoats = noBoats and len(i) == 1
+        noBoats = noBoats and len(i) == 0
     return noBoats
 
-def sinkBoat(lign, begin, end):
+def sinkBoat(mapP,lign, begin, end):
     """Fait couler le bateau et créée un message pour prévenir les joueurs."""
-    changeSquares(map, lign, begin, end, 4)
+    changeSquares(mapP, lign, begin, end, 4)
     sinkMsg = "Le bateau allant de {}{} à {}{} est coulé!".format(
             lign, begin+1, lign, end+1)
     return sinkMsg
 
-def checkSinkedAndSink(map, row, column, boats):
+def checkSinkedAndSink(mapP, row, column, boats):
     """Regarde si un bateau est touché sur chacune de ces cases.\n
     Dans ce cas, le fait couler, et renvoie un message."""
     sinkMsg = ""
@@ -101,17 +101,17 @@ def checkSinkedAndSink(map, row, column, boats):
             lign, begin, end = boat
             if row == lign:         #La case touchée est sur la même ligne que le bateau. (horizontal)
                 for otherLign in range(begin, end+1):
-                    isSinked = isSinked and map[lign][otherLign] == 3
+                    isSinked = isSinked and mapP[lign][otherLign] == 3
                 if isSinked:
                     lign, begin, end = coords.pop(index)
-                    sinkMsg = sinkBoat(lign, begin, end)
+                    sinkMsg = sinkBoat(mapP, lign, begin, end)
             elif column == lign:    #La case touchée est sur la même ligne que le bateau. (vertical)
-                identifiers = map.keys()
+                identifiers = list(mapP.keys())
                 begin = identifiers.index(begin)
                 end = identifiers.index(end)
                 for otherLign in identifiers[begin:end+1]:
-                    isSinked = isSinked and map[otherLign][lign] == 3
+                    isSinked = isSinked and mapP[otherLign][lign] == 3
                 if isSinked:
                     lign, begin, end = coords.pop(index)
-                    sinkMsg = sinkBoat(lign, begin, end)
+                    sinkMsg = sinkBoat(mapP, lign, begin, end)
     return sinkMsg
