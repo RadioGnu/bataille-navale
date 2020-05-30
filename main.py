@@ -125,7 +125,7 @@ def prepPhase(mapP, boats):
         print("Donner les cases de début et de fin de votre bateau.")
         row1, column1 = squareInput(mapP)
         row2, column2 = squareInput(mapP)
-        clear()
+#        clear()
         if row1 == row2:    
             if isBigger(column1, column2):
                 placeOrReset(mapP, row1, column2, column1, boats)                  
@@ -143,47 +143,38 @@ def prepPhase(mapP, boats):
     if screenClean():
         clear()
 
+def play_turn(name, player_map, boats):
+    turn_ongoing = True
+    victory = False
+    while turn_ongoing:    #Tour joueur 1
+        """Pour éviter que le tour se finisse prématurément quand il y a une erreur,
+        on fait une boucle while."""
+        try:
+            row, column = squareInput(player_map)
+#            clear()
+            attackSquare(player_map, row, column, boats)
+            boatsDestroyed = hasNoBoats(boats)
+            if boatsDestroyed:
+                print(f"{name} a gagné !")
+                victory = True
+            turn_ongoing = False
+        except AttackedError:
+            print("Vous avez déjà attaqué cette case.")
+    return victory
+
 def battlePhase(map1, map2, boats1, boats2):
     """Les joueurs choississent à tour de rôle les cases qu'ils veulent attaquer."""
-    displayMaps(map1, map2)
-    while True:
-        noBoatsP1 = hasNoBoats(boats1)
-        noBoatsP2 = hasNoBoats(boats2)
-        if noBoatsP1 and noBoatsP2:
-            """La vérification se fait au début de chaque tour,
-            il est donc possible que les deux joueurs n'est plus de bateaux.
-            Pour éviter de devoir choisir qui gagne dans ce cas-là, on dit qu'il y a match nul."""
-            print("Match nul!")
-            break
-        elif noBoatsP1:
-            print("Le joueur 2 a gagné !")
-            break
-        elif noBoatsP2:
-            print("Le joueur 1 a gagné !")
-            break
-
-        for turn in range(1,3):
-            print("Joueur " + str(turn) + ", attaquez une case.")
-            while turn == 1:    #Tour joueur 1
-                """Pour éviter que le tour se finisse prématurément quand il y a une erreur,
-                on fait une boucle while."""
-                try:
-                    row, column = squareInput(map2)
-                    clear()
-                    attackSquare(map2, row, column, boats2)
-                    break   #Le tour est fini, on sort de la boucle.
-                except AttackedError:
-                    print("Vous avez déjà attaqué cette case.")
-            while turn == 2:    #Tour joueur 2
-                try:
-                    row, column = squareInput(map1)
-                    clear()
-                    attackSquare(map1, row, column, boats1)
-                    break
-                except AttackedError:
-                    print("Vous avez déjà attaqué cette case.")
+    battle_ongoing = True
+    name1 = "Joueur 1"
+    name2 = "Joueur 2"
+    while battle_ongoing:
+        displayMaps(map1,map2)
+        victory = play_turn(name1, map2, boats2)
+        if not victory:
             displayMaps(map1,map2)
-
+            victory = play_turn(name2, map1, boats1)
+        if victory:
+            battle_ongoing = False
 # Main
 
 if __name__ == "__main__":

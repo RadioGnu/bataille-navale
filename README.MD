@@ -9,5 +9,17 @@ Lancer le programme avec python3, et suivez les instructions.\
 Les cases doivent être données du début à la fin incluse.
 B0 est un raccourci pour B10.
 
-# Requirements
+## Requirements
 - Python 3.7
+
+## Usage
+
+Pour lancer une game:
+```
+$> python3 main.py
+```
+
+Pour exécuter des tests:
+```
+$> cat test_file - | python3 main.py
+```
