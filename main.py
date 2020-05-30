@@ -55,11 +55,11 @@ def squareInput(mapP):
 
 def wantsReset():
     """Demande à l'utilisateur si il veut enlever son bateau."""
-    reset = input("Voulez vous enlever le dernier bateau placé?(o/n) ")
+    reset = input("Confirmez-vous le placement du bateau?(o/n) ")
     if reset in ('o', 'O'):
-        return True
-    else:
         return False
+    else:
+        return True
 
 def screenClean():
     """Demande à l'utilisateur si il veut effacer la carte,
