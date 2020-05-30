@@ -186,30 +186,34 @@ def battlePhase(map1, map2, boats1, boats2):
 
 # Main
 
-mapP1 = deepcopy(EMPTY_MAP)
-mapP2 = deepcopy(EMPTY_MAP)
+if __name__ == "__main__":
+    try:
+        mapP1 = deepcopy(EMPTY_MAP)
+        mapP2 = deepcopy(EMPTY_MAP)
 
-boatsP1 = deepcopy(BOATS)
-boatsP2 = deepcopy(BOATS)
+        boatsP1 = deepcopy(BOATS)
+        boatsP2 = deepcopy(BOATS)
 
-"""if hasGraphics:
-    wantsGraphics = graphical()
-else:
-    wantsGraphics = hasGraphics
+        """if hasGraphics:
+            wantsGraphics = graphical()
+        else:
+            wantsGraphics = hasGraphics
 
-if wantsGraphics:
-    window = tk.Tk()
-    window.title("Bataille navale")
-    window.geometry("1080x720")
-    window.minsize(480,360)
-    window.config(background="#607c8e")
-    
-    window.mainloop()"""
+        if wantsGraphics:
+            window = tk.Tk()
+            window.title("Bataille navale")
+            window.geometry("1080x720")
+            window.minsize(480,360)
+            window.config(background="#607c8e")
+            
+            window.mainloop()"""
 
-print("C'est au tour du joueur 1 de placer ses bateaux.\n")
-prepPhase(mapP1, boatsP1)
+        print("C'est au tour du joueur 1 de placer ses bateaux.\n")
+        prepPhase(mapP1, boatsP1)
 
-print("C'est au tour du joueur 2 de placer ses bateaux.\n")
-prepPhase(mapP2, boatsP2)
+        print("C'est au tour du joueur 2 de placer ses bateaux.\n")
+        prepPhase(mapP2, boatsP2)
 
-battlePhase(mapP1, mapP2, boatsP1, boatsP2)
+        battlePhase(mapP1, mapP2, boatsP1, boatsP2)
+    except KeyboardInterrupt:
+        print("\n\nControl-C, exiting.")
