@@ -36,7 +36,7 @@ BOATS = {2:[1], 3:[2], 4:[1], 5:[1]}    #Les bateaux organisés sous la forme ta
         return False'''
 
 def squareInput(mapP):
-    """Fonction qui demande une case à l'utilisateur, et convertit la chaine en tuple.\n"""
+    """Fonction qui demande une case à l'utilisateur, et convertit la chaine de caractères en tuple.\n"""
     while True:
         try:
             square = input("Donner la case(ligne, colonne): ")
